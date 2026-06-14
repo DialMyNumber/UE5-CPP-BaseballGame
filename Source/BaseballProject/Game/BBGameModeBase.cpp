@@ -23,7 +23,7 @@ void ABBGameModeBase::OnPostLogin(AController* NewPlayer)
 	if (IsValid(BBPlayerController) == true)
 	{
 		// PlayerController는 Server에 있기 때문에 Replication
-		// NotificationText
+		// GameMode(Server)에 접속한 PlayerController가 유효할 때 NotificationText 변경
 		BBPlayerController->NotificationText = FText::FromString(TEXT("Connected to the game server."));
 
 		AllPlayerControllers.Add(BBPlayerController);
@@ -131,33 +131,45 @@ FString ABBGameModeBase::JudgeResult(const FString& InSecretNumberString, const 
 
 void ABBGameModeBase::PrintChatMessageString(ABBPlayerController* InChattingPlayerController, const FString& InChatMessageString)
 {
-	FString ChatMessageString = InChatMessageString;
-	int Index = InChatMessageString.Len() - 3;
-	FString GuessNumberString = InChatMessageString.RightChop(Index);
-	if (IsGuessNumberString(GuessNumberString) == true)
+	FString GuessNumberString = InChatMessageString.Right(3);
+
+	if (IsGuessNumberString(GuessNumberString))
 	{
+		IncreaseGuessCount(InChattingPlayerController);
+
+		ABBPlayerState* BBPS = InChattingPlayerController->GetPlayerState<ABBPlayerState>();
+
 		FString JudgeResultString = JudgeResult(SecretNumberString, GuessNumberString);
 
-		IncreaseGuessCount(InChattingPlayerController);		// 시도한 횟수 1 늘리기
+		FString CombinedMessageString = BBPS->GetPlayerInfoString() + TEXT(": ") + InChatMessageString + TEXT(" -> ") + JudgeResultString;
 
 		for (TActorIterator<ABBPlayerController> It(GetWorld()); It; ++It)
-		{ // PlayerController 전체를 순회를 돌며 알려줌
-			ABBPlayerController* BBPlayerController = *It;
-			if (IsValid(BBPlayerController) == true)
+		{
+			ABBPlayerController* PC = *It;
+
+			if (IsValid(PC))
 			{
-				FString CombinedMessageString = InChatMessageString + TEXT(" -> ") + JudgeResultString;
-				BBPlayerController->ClientRPCPrintChatMessageString(CombinedMessageString);
+				PC->ClientRPCPrintChatMessageString(CombinedMessageString);
 			}
 		}
+
+		int32 StrikeCount = FCString::Atoi(*JudgeResultString.Left(1));
+
+		JudgeGame(InChattingPlayerController, StrikeCount);
 	}
-	else // GuessNumberString 채팅이 아닐시
+	else
 	{
+		ABBPlayerState* BBPS = InChattingPlayerController->GetPlayerState<ABBPlayerState>();
+
+		FString CombinedMessageString = BBPS->PlayerNameString + TEXT(": ") + InChatMessageString;
+
 		for (TActorIterator<ABBPlayerController> It(GetWorld()); It; ++It)
 		{
-			ABBPlayerController* BBPlayerController = *It;
-			if (IsValid(BBPlayerController) == true)
+			ABBPlayerController* PC = *It;
+
+			if (IsValid(PC))
 			{
-				BBPlayerController->ClientRPCPrintChatMessageString(InChatMessageString);
+				PC->ClientRPCPrintChatMessageString(CombinedMessageString);
 			}
 		}
 	}
@@ -169,5 +181,63 @@ void ABBGameModeBase::IncreaseGuessCount(ABBPlayerController* InChattingPlayerCo
 	if (IsValid(BBPS) == true)
 	{
 		BBPS->CurrentGuessCount++;
+	}
+}
+
+void ABBGameModeBase::ResetGame()
+{
+	SecretNumberString = GenerateSecretNumber();
+
+	for (const auto& BBPlayerController : AllPlayerControllers)
+	{
+		ABBPlayerState* BBPS = BBPlayerController->GetPlayerState<ABBPlayerState>();
+		if (IsValid(BBPS) == true)
+		{
+			BBPS->CurrentGuessCount = 0;
+		}
+	}
+}
+
+void ABBGameModeBase::JudgeGame(ABBPlayerController* InChattingPlayerController, int InStrikeCount)
+{
+	if (3 == InStrikeCount)
+	{
+		ABBPlayerState* BBPS = InChattingPlayerController->GetPlayerState<ABBPlayerState>();
+		for (const auto& BBPlayerController : AllPlayerControllers)
+		{
+			if (IsValid(BBPS) == true)
+			{
+				FString CombinedMessageString = BBPS->PlayerNameString + TEXT(" has won the game.");
+				BBPlayerController->NotificationText = FText::FromString(CombinedMessageString);
+
+				ResetGame();
+			}
+		}
+	}
+	else
+	{
+		bool bIsDraw = true;
+		for (const auto& BBPlayerController : AllPlayerControllers)
+		{
+			ABBPlayerState* BBPS = BBPlayerController->GetPlayerState<ABBPlayerState>();
+			if (IsValid(BBPS) == true)
+			{
+				if (BBPS->CurrentGuessCount < BBPS->MaxGuessCount)
+				{
+					bIsDraw = false;
+					break;
+				}
+			}
+		}
+
+		if (true == bIsDraw)
+		{
+			for (const auto& BBPlayerController : AllPlayerControllers)
+			{
+				BBPlayerController->NotificationText = FText::FromString(TEXT("Draw."));
+
+				ResetGame();
+			}
+		}
 	}
 }

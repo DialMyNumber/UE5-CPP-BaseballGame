@@ -32,6 +32,10 @@ public:
 	// 해당 PlayerController의 시도 횟수를 늘려주는 함수
 	void IncreaseGuessCount(ABBPlayerController* InChattingPlayerController);
 
+	void ResetGame();
+
+	void JudgeGame(ABBPlayerController* InChattingPlayerController, int InStrikeCount);
+
 protected:
 	FString SecretNumberString;
 
