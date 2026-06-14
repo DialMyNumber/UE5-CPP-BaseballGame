@@ -7,6 +7,7 @@
 #include "EngineUtils.h"				// TActorIterator를 위한 헤더
 #include "Kismet/GameplayStatics.h"
 #include "Game/BBGameModeBase.h"
+#include "BBPlayerState.h"
 
 
 void ABBPlayerController::BeginPlay()
@@ -45,7 +46,15 @@ void ABBPlayerController::SetChatMessageString(const FString& InChatMessageStrin
 
 	if (IsLocalController() == true)
 	{
-		ServerRPCPrintChatMessageString(InChatMessageString);
+		// ServerRPCPrintChatMessageString(InChatMessageString);
+
+		ABBPlayerState* BBPS = GetPlayerState<ABBPlayerState>();
+		if (IsValid(BBPS) == true)
+		{
+			FString CombinedMessageString = BBPS->PlayerNameString + TEXT(": ") + InChatMessageString;
+
+			ServerRPCPrintChatMessageString(CombinedMessageString);
+		}
 	}
 }
 
