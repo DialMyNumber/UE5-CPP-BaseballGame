@@ -7,6 +7,7 @@
 class BBFunctionLibrary
 {
 public:
+	// static인 이유는 class MyPrintString 객체가 없더라도 함수를 호출할 수 있도록
 	static void MyPrintString(
 		const AActor* InWorldContextActor, // GetWorld를 통해 어떤 World에 있는지를 가져올만할 객체
 		const FString& InString, 
