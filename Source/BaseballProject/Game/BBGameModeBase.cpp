@@ -133,6 +133,9 @@ void ABBGameModeBase::PrintChatMessageString(ABBPlayerController* InChattingPlay
 	if (IsGuessNumberString(GuessNumberString) == true)
 	{
 		FString JudgeResultString = JudgeResult(SecretNumberString, GuessNumberString);
+
+		IncreaseGuessCount(InChattingPlayerController);		// 시도한 횟수 1 늘리기
+
 		for (TActorIterator<ABBPlayerController> It(GetWorld()); It; ++It)
 		{ // PlayerController 전체를 순회를 돌며 알려줌
 			ABBPlayerController* BBPlayerController = *It;
@@ -153,5 +156,14 @@ void ABBGameModeBase::PrintChatMessageString(ABBPlayerController* InChattingPlay
 				BBPlayerController->ClientRPCPrintChatMessageString(InChatMessageString);
 			}
 		}
+	}
+}
+
+void ABBGameModeBase::IncreaseGuessCount(ABBPlayerController* InChattingPlayerController)
+{
+	ABBPlayerState* BBPS = InChattingPlayerController->GetPlayerState<ABBPlayerState>();
+	if (IsValid(BBPS) == true)
+	{
+		BBPS->CurrentGuessCount++;
 	}
 }

@@ -29,6 +29,9 @@ public:
 
 	void PrintChatMessageString(ABBPlayerController* InChattingPlayerController, const FString& InChatMessageString);
 
+	// 해당 PlayerController의 시도 횟수를 늘려주는 함수
+	void IncreaseGuessCount(ABBPlayerController* InChattingPlayerController);
+
 protected:
 	FString SecretNumberString;
 
