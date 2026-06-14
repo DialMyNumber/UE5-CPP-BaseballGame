@@ -8,7 +8,14 @@
 #include "Kismet/GameplayStatics.h"
 #include "Game/BBGameModeBase.h"
 #include "BBPlayerState.h"
+#include "Net/UnrealNetwork.h"
 
+
+ABBPlayerController::ABBPlayerController()
+{
+	// ABBPlayerContorller를 Replication에 등록(기본값이 true)
+	bReplicates = true;
+}
 
 void ABBPlayerController::BeginPlay()
 {
@@ -31,6 +38,15 @@ void ABBPlayerController::BeginPlay()
 		if (IsValid(ChatInputWidgetInstance) == true)
 		{
 			ChatInputWidgetInstance->AddToViewport();	// Viewport에 추가
+		}
+	}
+
+	if (IsValid(NotificationTextWidgetClass) == true)
+	{
+		NotificationTextWidgetInstance = CreateWidget<UUserWidget>(this, NotificationTextWidgetClass);
+		if (IsValid(NotificationTextWidgetInstance) == true)
+		{
+			NotificationTextWidgetInstance->AddToViewport();
 		}
 	}
 }
@@ -77,6 +93,13 @@ void ABBPlayerController::PrintChatMessageString(const FString& InChatMessageStr
 	// NetMode와 Message만 출력하는 함수, BaseballProject.h에 구현함
 	*/
 	BBFunctionLibrary::MyPrintString(this, InChatMessageString, 10.f);
+}
+
+void ABBPlayerController::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ThisClass, NotificationText);
 }
 
 // RPC를 구현할 때에는 _Implementation 를 붙여야함
