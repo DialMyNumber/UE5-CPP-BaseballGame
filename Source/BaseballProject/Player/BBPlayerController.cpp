@@ -51,7 +51,8 @@ void ABBPlayerController::SetChatMessageString(const FString& InChatMessageStrin
 		ABBPlayerState* BBPS = GetPlayerState<ABBPlayerState>();
 		if (IsValid(BBPS) == true)
 		{
-			FString CombinedMessageString = BBPS->PlayerNameString + TEXT(": ") + InChatMessageString;
+			// FString CombinedMessageString = BBPS->PlayerNameString + TEXT(": ") + InChatMessageString;
+			FString CombinedMessageString = BBPS->GetPlayerInfoString() + TEXT(": ") + InChatMessageString;
 
 			ServerRPCPrintChatMessageString(CombinedMessageString);
 		}
