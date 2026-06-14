@@ -3,7 +3,8 @@
 #include "BBPlayerController.h"
 #include "UI/BBChatInput.h"
 #include "Kismet/KismetSystemLibrary.h"
-#include "BaseballProject.h"			//  NetMode와 Message만 출력할 수 있도록
+#include "BaseballProject.h"			// NetMode와 Message만 출력할 수 있도록
+#include "EngineUtils.h"				// TActorIterator를 위한 헤더
 
 void ABBPlayerController::BeginPlay()
 {
@@ -36,7 +37,13 @@ void ABBPlayerController::SetChatMessageString(const FString& InChatMessageStrin
 	ChatMessageString = InChatMessageString;
 
 	// 입력 값을 출력하는 함수
-	PrintChatMessageString(ChatMessageString);
+	// PrintChatMessageString(ChatMessageString);
+
+
+	if (IsLocalController() == true)
+	{
+		ServerRPCPrintChatMessageString(InChatMessageString);
+	}
 }
 
 void ABBPlayerController::PrintChatMessageString(const FString& InChatMessageString)
@@ -57,4 +64,25 @@ void ABBPlayerController::PrintChatMessageString(const FString& InChatMessageStr
 	// NetMode와 Message만 출력하는 함수, BaseballProject.h에 구현함
 	*/
 	BBFunctionLibrary::MyPrintString(this, InChatMessageString, 10.f);
+}
+
+// RPC를 구현할 때에는 _Implementation 를 붙여야함
+void ABBPlayerController::ClientRPCPrintChatMessageString_Implementation(const FString& InChatMessageString)
+{
+	PrintChatMessageString(InChatMessageString);
+}
+
+// RPC를 구현할 때에는 _Implementation 를 붙여야함
+// Server에서 실행될 RPC
+// Server에는 모든 PlayerController가 존재함
+void ABBPlayerController::ServerRPCPrintChatMessageString_Implementation(const FString& InChatMessageString)
+{
+	for (TActorIterator<ABBPlayerController> It(GetWorld()); It; ++It)
+	{
+		ABBPlayerController* BBPlayerController = *It;
+		if (IsValid(BBPlayerController) == true)
+		{
+			BBPlayerController->ClientRPCPrintChatMessageString(InChatMessageString);
+		}
+	}
 }

@@ -20,6 +20,14 @@ public:
 
 	void PrintChatMessageString(const FString& InChatMessageString);
 
+	// Reliable을 통해 메세지 신뢰성 설정
+	UFUNCTION(Client, Reliable)
+	void ClientRPCPrintChatMessageString(const FString& InChatMessageString);
+
+	// Reliable을 통해 메세지 신뢰성 설정
+	UFUNCTION(Server, Reliable)
+	void ServerRPCPrintChatMessageString(const FString& InChatMessageString);
+
 protected:
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<UBBChatInput> ChatInputWidgetClass;
