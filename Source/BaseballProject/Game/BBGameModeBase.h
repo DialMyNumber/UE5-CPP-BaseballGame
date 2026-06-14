@@ -6,6 +6,8 @@
 #include "GameFramework/GameModeBase.h"
 #include "BBGameModeBase.generated.h"
 
+class ABBPlayerController;
+
 UCLASS()
 class BASEBALLPROJECT_API ABBGameModeBase : public AGameModeBase
 {
@@ -23,4 +25,12 @@ public:
 	// GuessNumber와 비교하여 결과를 알려주는 함수
 	FString JudgeResult(const FString& InSecretNumberString, const FString& InGuessNumberString);
 
+	virtual void BeginPlay() override;
+
+	void PrintChatMessageString(ABBPlayerController* InChattingPlayerController, const FString& InChatMessageString);
+
+protected:
+	FString SecretNumberString;
+
+	TArray<TObjectPtr<ABBPlayerController>> AllPlayerControllers;
 };

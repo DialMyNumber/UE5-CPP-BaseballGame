@@ -2,6 +2,17 @@
 
 #include "BBGameModeBase.h"
 #include "BBGameStateBase.h"
+#include "Player/BBPlayerController.h"
+#include "EngineUtils.h"
+
+void ABBGameModeBase::BeginPlay()
+{
+	Super::BeginPlay();
+
+	// 정답 String 저장
+	SecretNumberString = GenerateSecretNumber();
+	UE_LOG(LogTemp, Warning, TEXT("%s"), *SecretNumberString);
+}
 
 void ABBGameModeBase::OnPostLogin(AController* NewPlayer)
 {
@@ -11,6 +22,13 @@ void ABBGameModeBase::OnPostLogin(AController* NewPlayer)
 	if (IsValid(BBGameStateBase) == true)
 	{
 		BBGameStateBase->MulticastRPCBroadcastLoginMessage(TEXT("Default"));
+	}
+
+	// PlayerController 저장
+	ABBPlayerController* BBPlayerController = Cast<ABBPlayerController>(NewPlayer);
+	if (IsValid(BBPlayerController) == true)
+	{
+		AllPlayerControllers.Add(BBPlayerController);
 	}
 }
 
@@ -98,4 +116,35 @@ FString ABBGameModeBase::JudgeResult(const FString& InSecretNumberString, const 
 	}
 
 	return FString::Printf(TEXT("%dS %dB"), StrikeCount, BallCount);
+}
+
+void ABBGameModeBase::PrintChatMessageString(ABBPlayerController* InChattingPlayerController, const FString& InChatMessageString)
+{
+	FString ChatMessageString = InChatMessageString;
+	int Index = InChatMessageString.Len() - 3;
+	FString GuessNumberString = InChatMessageString.RightChop(Index);
+	if (IsGuessNumberString(GuessNumberString) == true)
+	{
+		FString JudgeResultString = JudgeResult(SecretNumberString, GuessNumberString);
+		for (TActorIterator<ABBPlayerController> It(GetWorld()); It; ++It)
+		{ // PlayerController 전체를 순회를 돌며 알려줌
+			ABBPlayerController* BBPlayerController = *It;
+			if (IsValid(BBPlayerController) == true)
+			{
+				FString CombinedMessageString = InChatMessageString + TEXT(" -> ") + JudgeResultString;
+				BBPlayerController->ClientRPCPrintChatMessageString(CombinedMessageString);
+			}
+		}
+	}
+	else // GuessNumberString 채팅이 아닐시
+	{
+		for (TActorIterator<ABBPlayerController> It(GetWorld()); It; ++It)
+		{
+			ABBPlayerController* BBPlayerController = *It;
+			if (IsValid(BBPlayerController) == true)
+			{
+				BBPlayerController->ClientRPCPrintChatMessageString(InChatMessageString);
+			}
+		}
+	}
 }
