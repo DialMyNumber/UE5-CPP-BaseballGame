@@ -13,4 +13,14 @@ class BASEBALLPROJECT_API ABBGameModeBase : public AGameModeBase
 
 public:
 	virtual void OnPostLogin(AController* NewPlayer) override;
+
+	// 랜덤한 정답 숫자를 만드는 함수
+	FString GenerateSecretNumber();
+
+	// 유효한 입력인지 확인하는 함수
+	bool IsGuessNumberString(const FString& InNumberString);
+
+	// GuessNumber와 비교하여 결과를 알려주는 함수
+	FString JudgeResult(const FString& InSecretNumberString, const FString& InGuessNumberString);
+
 };
