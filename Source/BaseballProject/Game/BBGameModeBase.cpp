@@ -1,3 +1,3 @@
 ﻿// BBGameModeBase.cpp
 
-#include "Game/BBGameModeBase.h"
+#include "BBGameModeBase.h"
