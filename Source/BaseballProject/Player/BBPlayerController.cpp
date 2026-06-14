@@ -5,6 +5,9 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "BaseballProject.h"			// NetMode와 Message만 출력할 수 있도록
 #include "EngineUtils.h"				// TActorIterator를 위한 헤더
+#include "Kismet/GameplayStatics.h"
+#include "Game/BBGameModeBase.h"
+
 
 void ABBPlayerController::BeginPlay()
 {
@@ -77,12 +80,23 @@ void ABBPlayerController::ClientRPCPrintChatMessageString_Implementation(const F
 // Server에는 모든 PlayerController가 존재함
 void ABBPlayerController::ServerRPCPrintChatMessageString_Implementation(const FString& InChatMessageString)
 {
-	for (TActorIterator<ABBPlayerController> It(GetWorld()); It; ++It)
+	// BBGameModeBase.cpp에서 구현하는 것으로 리팩토링
+	//for (TActorIterator<ABBPlayerController> It(GetWorld()); It; ++It)
+	//{
+	//	ABBPlayerController* BBPlayerController = *It;
+	//	if (IsValid(BBPlayerController) == true)
+	//	{
+	//		BBPlayerController->ClientRPCPrintChatMessageString(InChatMessageString);
+	//	}
+	//}
+
+	AGameModeBase* GM = UGameplayStatics::GetGameMode(this);
+	if (IsValid(GM) == true)
 	{
-		ABBPlayerController* BBPlayerController = *It;
-		if (IsValid(BBPlayerController) == true)
+		ABBGameModeBase* BBGM = Cast<ABBGameModeBase>(GM);
+		if (IsValid(BBGM) == true)
 		{
-			BBPlayerController->ClientRPCPrintChatMessageString(InChatMessageString);
+			BBGM->PrintChatMessageString(this, InChatMessageString);
 		}
 	}
 }
