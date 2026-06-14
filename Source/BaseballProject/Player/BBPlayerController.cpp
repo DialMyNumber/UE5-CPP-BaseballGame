@@ -3,6 +3,7 @@
 #include "BBPlayerController.h"
 #include "UI/BBChatInput.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "BaseballProject.h"			//  NetMode와 Message만 출력할 수 있도록
 
 void ABBPlayerController::BeginPlay()
 {
@@ -41,11 +42,19 @@ void ABBPlayerController::SetChatMessageString(const FString& InChatMessageStrin
 void ABBPlayerController::PrintChatMessageString(const FString& InChatMessageString)
 {
 	// 좌상단에 Log처럼 메세지를 띄우는 코드
-	UKismetSystemLibrary::PrintString(
-		this,						// World Context, this = PlayerController
-		ChatMessageString,			// 메세지
-		true,						// 스크린에 출력할지 여부
-		true,						// 로그에 출력할지 여부
-		FLinearColor::Red,			// 색깔
-		5.0f);						// 유지 시간
+	//UKismetSystemLibrary::PrintString(
+	//	this,						// World Context, this = PlayerController
+	//	ChatMessageString,			// 메세지
+	//	true,						// 스크린에 출력할지 여부
+	//	true,						// 로그에 출력할지 여부
+	//	FLinearColor::Red,			// 색깔
+	//	5.0f);						// 유지 시간
+
+	/* 디버깅용 코드 블록
+	FString NetModeString = BBFunctionLibrary::GetNetModeString(this);	// 현재 NetMode를 String으로 알려주는 함수
+	FString CombinedMessageString = FString::Printf(TEXT("%s: %s"), *NetModeString, *InChatMessageString);
+	BBFunctionLibrary::MyPrintString(this, CombinedMessageString, 10.f);
+	// NetMode와 Message만 출력하는 함수, BaseballProject.h에 구현함
+	*/
+	BBFunctionLibrary::MyPrintString(this, InChatMessageString, 10.f);
 }
