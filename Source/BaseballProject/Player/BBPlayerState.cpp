@@ -1,4 +1,4 @@
-// BBPlayerState.cpp
+ï»¿// BBPlayerState.cpp
 
 #include "Player/BBPlayerState.h"
 
@@ -6,7 +6,7 @@
 
 ABBPlayerState::ABBPlayerState()
 {
-	// 1. ReplicationÀ» À§ÇØ ÀÌ ActorÀÇ bReplicates¸¦ true·Î ¼³Á¤
+	// 1. Replicationì„ ìœ„í•´ ì´ Actorì˜ bReplicatesë¥¼ trueë¡œ ì„¤ì •
 	bReplicates = true;
 }
 
@@ -14,7 +14,7 @@ void ABBPlayerState::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>&
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	// 3. DOREPLIFETIME ¸ÅÅ©·Î¸¦ »ç¿ëÇØ º¹Á¦ÇÒ ¼Ó¼ºÀ» ¸í½Ã
-	// "Net/UnrealNetwork.h" Çì´õÆÄÀÏ ÇÊ¿ä
+	// 3. DOREPLIFETIME ë§¤í¬ë¡œë¥¼ ì‚¬ìš©í•´ ë³µì œí•  ì†ì„±ì„ ëª…ì‹œ
+	// "Net/UnrealNetwork.h" í—¤ë”íŒŒì¼ í•„ìš”
 	DOREPLIFETIME(ThisClass, PlayerNameString);
 }

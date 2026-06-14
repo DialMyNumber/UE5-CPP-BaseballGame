@@ -1,4 +1,4 @@
-// BBPlayerState.h
+ï»¿// BBPlayerState.h
 
 #pragma once
 
@@ -13,11 +13,11 @@ class BASEBALLPROJECT_API ABBPlayerState : public APlayerState
 public:
 	ABBPlayerState();
 
-	// 3. GetLifetimeReplicatedProps() ÇÔ¼ö¿¡ ³×Æ®¿öÅ©·Î º¹Á¦ÇÒ ¼Ó¼ºÀ» Ãß°¡
+	// 3. GetLifetimeReplicatedProps() í•¨ìˆ˜ì— ë„¤íŠ¸ì›Œí¬ë¡œ ë³µì œí•  ì†ì„±ì„ ì¶”ê°€
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 	
 public:
-	// 2. ReplicationÀ» À§ÇØ UPROPERTY¿¡ Replicated Å°¿öµå Ãß°¡
+	// 2. Replicationì„ ìœ„í•´ UPROPERTYì— Replicated í‚¤ì›Œë“œ ì¶”ê°€
 	UPROPERTY(Replicated)
 	FString PlayerNameString;
 };
