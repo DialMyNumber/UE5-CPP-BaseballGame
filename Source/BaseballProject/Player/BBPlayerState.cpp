@@ -7,7 +7,7 @@
 ABBPlayerState::ABBPlayerState()
 	: PlayerNameString(TEXT("None"))
 	, CurrentGuessCount(0)
-	, MaxGuessCount(7)
+	, MaxGuessCount(5)
 {
 	// 1. Replication을 위해 이 Actor의 bReplicates를 true로 설정
 	bReplicates = true;
