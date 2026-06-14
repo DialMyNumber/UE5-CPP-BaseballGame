@@ -56,4 +56,22 @@ public:
 		return NetModeString;
 	}
 
+	// NetRole을 String으로 가져오는 함수
+	// 하나의 액터의 NetRole은 [Local Role, Remote Role] 두 가지를 가지고 있고
+	// None, Authority, Autonomous Proxy, Simulated Proxy 총 4가지 종류가 있음
+	static FString GetRoleString(const AActor* InActor)
+	{
+		FString RoleString = TEXT("None");
+
+		if (IsValid(InActor) == true)
+		{
+			FString LocalRoleString = UEnum::GetValueAsString(TEXT("Engine.ENetRole"), InActor->GetLocalRole());
+			FString RemoteRoleString = UEnum::GetValueAsString(TEXT("Engine.ENetRole"), InActor->GetRemoteRole());
+
+			RoleString = FString::Printf(TEXT("%s / %s"), *LocalRoleString, *RemoteRoleString);
+		}
+
+		return RoleString;
+	}
+
 };
