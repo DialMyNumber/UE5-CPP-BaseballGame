@@ -53,25 +53,12 @@ void ABBPlayerController::BeginPlay()
 
 void ABBPlayerController::SetChatMessageString(const FString& InChatMessageString)
 {
-	// 입력 값을 대입하는 간단한 기능
 	ChatMessageString = InChatMessageString;
 
-	// 입력 값을 출력하는 함수
-	// PrintChatMessageString(ChatMessageString);
-
-
-	if (IsLocalController() == true)
+	if (IsLocalController())
 	{
-		// ServerRPCPrintChatMessageString(InChatMessageString);
-
-		ABBPlayerState* BBPS = GetPlayerState<ABBPlayerState>();
-		if (IsValid(BBPS) == true)
-		{
-			// FString CombinedMessageString = BBPS->PlayerNameString + TEXT(": ") + InChatMessageString;
-			FString CombinedMessageString = BBPS->GetPlayerInfoString() + TEXT(": ") + InChatMessageString;
-
-			ServerRPCPrintChatMessageString(CombinedMessageString);
-		}
+		// 입력값만 서버에 전달
+		ServerRPCPrintChatMessageString(InChatMessageString);
 	}
 }
 
@@ -92,7 +79,7 @@ void ABBPlayerController::PrintChatMessageString(const FString& InChatMessageStr
 	BBFunctionLibrary::MyPrintString(this, CombinedMessageString, 10.f);
 	// NetMode와 Message만 출력하는 함수, BaseballProject.h에 구현함
 	*/
-	BBFunctionLibrary::MyPrintString(this, InChatMessageString, 10.f);
+	BBFunctionLibrary::MyPrintString(this, InChatMessageString, 100);
 }
 
 void ABBPlayerController::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
