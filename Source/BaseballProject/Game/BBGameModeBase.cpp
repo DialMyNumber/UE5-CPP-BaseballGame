@@ -4,6 +4,7 @@
 #include "BBGameStateBase.h"
 #include "Player/BBPlayerController.h"
 #include "EngineUtils.h"
+#include "Player/BBPlayerState.h"				// Player 이름 구분 
 
 void ABBGameModeBase::BeginPlay()
 {
@@ -18,17 +19,23 @@ void ABBGameModeBase::OnPostLogin(AController* NewPlayer)
 {
 	Super::OnPostLogin(NewPlayer);
 
-	ABBGameStateBase* BBGameStateBase = GetGameState<ABBGameStateBase>();
-	if (IsValid(BBGameStateBase) == true)
-	{
-		BBGameStateBase->MulticastRPCBroadcastLoginMessage(TEXT("Default"));
-	}
-
-	// PlayerController 저장
 	ABBPlayerController* BBPlayerController = Cast<ABBPlayerController>(NewPlayer);
 	if (IsValid(BBPlayerController) == true)
 	{
 		AllPlayerControllers.Add(BBPlayerController);
+
+		ABBPlayerState* BBPS = BBPlayerController->GetPlayerState<ABBPlayerState>();
+		if (IsValid(BBPS) == true)
+		{
+			// Server에 있는 PlayerState의 속성을 변경하면 Replication이 이루어짐
+			BBPS->PlayerNameString = TEXT("Player") + FString::FromInt(AllPlayerControllers.Num());
+		}
+
+		ABBGameStateBase* BBGameStateBase = GetGameState<ABBGameStateBase>();
+		if (IsValid(BBGameStateBase) == true)
+		{
+			BBGameStateBase->MulticastRPCBroadcastLoginMessage(BBPS->PlayerNameString);
+		}
 	}
 }
 
