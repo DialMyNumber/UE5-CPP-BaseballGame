@@ -22,6 +22,10 @@ void ABBGameModeBase::OnPostLogin(AController* NewPlayer)
 	ABBPlayerController* BBPlayerController = Cast<ABBPlayerController>(NewPlayer);
 	if (IsValid(BBPlayerController) == true)
 	{
+		// PlayerController는 Server에 있기 때문에 Replication
+		// NotificationText
+		BBPlayerController->NotificationText = FText::FromString(TEXT("Connected to the game server."));
+
 		AllPlayerControllers.Add(BBPlayerController);
 
 		ABBPlayerState* BBPS = BBPlayerController->GetPlayerState<ABBPlayerState>();
