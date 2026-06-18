@@ -40,7 +40,7 @@ protected:
 	UPROPERTY()
 	TObjectPtr<UBBChatInput> ChatInputWidgetInstance;
 
-	// 입력할 채팅 문자열
+	// 입력할 채팅 문자열 Widget
 	FString ChatMessageString;
 
 	UPROPERTY(EditDefaultsOnly)
@@ -48,6 +48,13 @@ protected:
 
 	UPROPERTY()
 	TObjectPtr<UUserWidget> NotificationTextWidgetInstance;
+
+	// 남은 시간 Timer Widget
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<UUserWidget> TimerWidgetClass;
+
+	UPROPERTY()
+	TObjectPtr<UUserWidget> TimerWidgetInstance;
 
 public:
 	UPROPERTY(Replicated, BlueprintReadOnly)

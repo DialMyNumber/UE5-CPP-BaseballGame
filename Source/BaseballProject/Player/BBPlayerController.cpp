@@ -27,7 +27,7 @@ void ABBPlayerController::BeginPlay()
 		return;
 	}
 	// -----------------------------------------
-	// IsLocalController()가 true 일때 = Owning Client일 때 수행됨
+	// 이 아래부터는 IsLocalController()가 true일 때 = Owning Client일 때 수행됨
 
 	FInputModeUIOnly InputModeUIOnly;	// Input모드를 UI에만 사용하도록
 	SetInputMode(InputModeUIOnly);
@@ -47,6 +47,15 @@ void ABBPlayerController::BeginPlay()
 		if (IsValid(NotificationTextWidgetInstance) == true)
 		{
 			NotificationTextWidgetInstance->AddToViewport();
+		}
+	}
+
+	if (IsValid(TimerWidgetClass) == true)	// TimerWidgetClass가 있을 때
+	{
+		TimerWidgetInstance = CreateWidget<UUserWidget>(this, TimerWidgetClass);
+		if (IsValid(TimerWidgetInstance) == true)
+		{
+			TimerWidgetInstance->AddToViewport();	// Viewport에 추가
 		}
 	}
 }
