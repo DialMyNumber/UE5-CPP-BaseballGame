@@ -34,7 +34,19 @@ public:
 
 	void ResetGame();
 
-	void JudgeGame(ABBPlayerController* InChattingPlayerController, int InStrikeCount);
+	bool JudgeGame(ABBPlayerController* InChattingPlayerController, int InStrikeCount);
+
+private:
+	UFUNCTION()
+	void OnMainTimerElapsed();
+
+	UFUNCTION()
+	void AdvanceTurn();
+
+private:
+	FTimerHandle MainTimerHandle;
+
+	int32 CurrentGuessPlayerIndex = 0;
 
 protected:
 	FString SecretNumberString;

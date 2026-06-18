@@ -13,6 +13,14 @@ void ABBGameModeBase::BeginPlay()
 	// 정답 String 저장
 	SecretNumberString = GenerateSecretNumber();
 	UE_LOG(LogTemp, Warning, TEXT("%s"), *SecretNumberString);
+
+	GetWorldTimerManager().SetTimer(
+		MainTimerHandle,
+		this,
+		&ABBGameModeBase::OnMainTimerElapsed,
+		1.0f,
+		true
+	);
 }
 
 void ABBGameModeBase::OnPostLogin(AController* NewPlayer)
@@ -94,7 +102,17 @@ bool ABBGameModeBase::IsGuessNumberString(const FString& InNumberString)
 			break;
 		}
 
+		ABBPlayerState* CurrentGuessPlayerState = AllPlayerControllers[CurrentGuessPlayerIndex]->GetPlayerState<ABBPlayerState>();
+
+		// 시간이 다 되었으면 플레이 불가
+		if (CurrentGuessPlayerState->CurrentGuessTime <= KINDA_SMALL_NUMBER)
+		{
+			break; // false 반환
+		}
+
 		bCanPlay = true;
+
+		CurrentGuessPlayerState->bDidParticipateThisTurn = true;
 
 	} while (false);
 
@@ -194,50 +212,107 @@ void ABBGameModeBase::ResetGame()
 		if (IsValid(BBPS) == true)
 		{
 			BBPS->CurrentGuessCount = 0;
+			BBPS->bDidParticipateThisTurn = false;
+			BBPS->CurrentGuessTime = BBPS->MaxGuessTime;
 		}
 	}
 }
 
-void ABBGameModeBase::JudgeGame(ABBPlayerController* InChattingPlayerController, int InStrikeCount)
+bool ABBGameModeBase::JudgeGame(ABBPlayerController* InChattingPlayerController, int InStrikeCount)
 {
-	if (3 == InStrikeCount)
+	if (InStrikeCount == 3)
 	{
 		ABBPlayerState* BBPS = InChattingPlayerController->GetPlayerState<ABBPlayerState>();
-		for (const auto& BBPlayerController : AllPlayerControllers)
-		{
-			if (IsValid(BBPS) == true)
-			{
-				FString CombinedMessageString = BBPS->PlayerNameString + TEXT(" has won the game.");
-				BBPlayerController->NotificationText = FText::FromString(CombinedMessageString);
 
-				ResetGame();
-			}
-		}
-	}
-	else
-	{
-		bool bIsDraw = true;
-		for (const auto& BBPlayerController : AllPlayerControllers)
-		{
-			ABBPlayerState* BBPS = BBPlayerController->GetPlayerState<ABBPlayerState>();
-			if (IsValid(BBPS) == true)
-			{
-				if (BBPS->CurrentGuessCount < BBPS->MaxGuessCount)
-				{
-					bIsDraw = false;
-					break;
-				}
-			}
-		}
-
-		if (true == bIsDraw)
+		if (IsValid(BBPS))
 		{
 			for (const auto& BBPlayerController : AllPlayerControllers)
 			{
-				BBPlayerController->NotificationText = FText::FromString(TEXT("Draw."));
+				FString CombinedMessageString = BBPS->PlayerNameString + TEXT(" has won the game.");
+				BBPlayerController->NotificationText = FText::FromString(CombinedMessageString);
+			}
 
-				ResetGame();
+			ResetGame();
+			return true;	// 누군가 승리했을때 게임 종료
+		}
+	}
+
+	bool bIsDraw = true;
+
+	for (const auto& BBPlayerController : AllPlayerControllers)
+	{
+		ABBPlayerState* BBPS = BBPlayerController->GetPlayerState<ABBPlayerState>();
+
+		if (IsValid(BBPS))
+		{
+			if (BBPS->CurrentGuessCount < BBPS->MaxGuessCount)
+			{
+				bIsDraw = false;
+				break;
 			}
 		}
+	}
+
+	if (bIsDraw)
+	{
+		for (const auto& BBPlayerController : AllPlayerControllers)
+		{
+			BBPlayerController->NotificationText = FText::FromString(TEXT("Draw."));
+		}
+
+		ResetGame();
+		return true;	// 비겼을때 게임 종료
+	}
+
+	return false;	// 아직 게임이 종료되지 않았을 때
+}
+
+void ABBGameModeBase::OnMainTimerElapsed()
+{
+	ABBPlayerState* CurrentGuessPlayerState =
+		AllPlayerControllers[CurrentGuessPlayerIndex]->GetPlayerState<ABBPlayerState>();
+
+	if (!CurrentGuessPlayerState)
+	{
+		return;
+	}
+
+	// 남은 시간 감소
+	if (CurrentGuessPlayerState->CurrentGuessTime > 0.f)
+	{
+		CurrentGuessPlayerState->CurrentGuessTime -= 1.f;
+	}
+
+	// 시간 종료 처리
+	if (CurrentGuessPlayerState->CurrentGuessTime <= 0.f)
+	{
+		// 이번 턴 미참여 패널티
+		if (CurrentGuessPlayerState->bDidParticipateThisTurn == false)
+		{
+			++CurrentGuessPlayerState->CurrentGuessCount;
+
+			// 타임아웃도 게임 판정에 포함
+			bool bGameEnded = JudgeGame(AllPlayerControllers[CurrentGuessPlayerIndex], 0);
+
+			if (bGameEnded)
+			{
+				return; // 게임 종료
+			}
+		}
+
+		AdvanceTurn();
+	}
+}
+
+void ABBGameModeBase::AdvanceTurn()
+{
+	// 다음 플레이어로 인덱스 변경
+	CurrentGuessPlayerIndex = (CurrentGuessPlayerIndex + 1) % AllPlayerControllers.Num();
+
+	// 다음 플레이어의 시간을 최대로 재설정
+	ABBPlayerState* NextPlayerState = AllPlayerControllers[CurrentGuessPlayerIndex]->GetPlayerState<ABBPlayerState>();
+	if (NextPlayerState)
+	{
+		NextPlayerState->CurrentGuessTime = NextPlayerState->MaxGuessTime;
 	}
 }

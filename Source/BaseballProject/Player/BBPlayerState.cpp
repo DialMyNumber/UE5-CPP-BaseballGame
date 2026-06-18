@@ -8,6 +8,9 @@ ABBPlayerState::ABBPlayerState()
 	: PlayerNameString(TEXT("None"))
 	, CurrentGuessCount(0)
 	, MaxGuessCount(5)
+	, CurrentGuessTime(10.f)
+	, MaxGuessTime(10.f)
+	, bDidParticipateThisTurn(false)
 {
 	// 1. Replication을 위해 이 Actor의 bReplicates를 true로 설정
 	bReplicates = true;
@@ -21,7 +24,10 @@ void ABBPlayerState::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>&
 	// "Net/UnrealNetwork.h" 헤더파일 필요
 	DOREPLIFETIME(ThisClass, PlayerNameString);
 	DOREPLIFETIME(ThisClass, CurrentGuessCount);
-	DOREPLIFETIME(ThisClass, MaxGuessCount); 
+	DOREPLIFETIME(ThisClass, MaxGuessCount);
+	DOREPLIFETIME(ThisClass, CurrentGuessTime);
+	DOREPLIFETIME(ThisClass, MaxGuessTime);
+	DOREPLIFETIME(ThisClass, bDidParticipateThisTurn);
 
 	// 변수 중에서 변경될 여지가 있으면 Replication에 등록,
 	// 변경될 여지 없이 고정 값이라면 Replication에 등록할 필요가 없음
